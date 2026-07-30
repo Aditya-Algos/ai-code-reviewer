@@ -30,67 +30,102 @@ function App() {
     }
   }
 
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter' && prUrl && !loading) {
+      handleReview()
+    }
+  }
+
   return (
-    <div style={{ maxWidth: '700px', margin: '40px auto', fontFamily: 'sans-serif' }}>
-      <h1>AI Code Review Assistant</h1>
-      <p>Paste a GitHub Pull Request URL to get an AI-generated review.</p>
-
-      <input
-        type="text"
-        value={prUrl}
-        onChange={(e) => setPrUrl(e.target.value)}
-        placeholder="https://github.com/owner/repo/pull/123"
-        style={{ width: '100%', padding: '10px', fontSize: '16px' }}
-      />
-
-      <button
-        onClick={handleReview}
-        disabled={loading || !prUrl}
-        style={{ marginTop: '10px', padding: '10px 20px', fontSize: '16px', cursor: 'pointer' }}
-      >
-        {loading ? 'Reviewing...' : 'Review PR'}
-      </button>
-
-      {error && (
-        <div style={{ marginTop: '20px', color: 'red' }}>
-          Error: {error}
+    <div className="app">
+      <div className="container">
+        <div className="header">
+          <div className="eyebrow">// ai code review</div>
+          <h1 className="title">Code Review Assistant</h1>
+          <p className="subtitle">
+            Paste a GitHub Pull Request URL and get an instant AI-generated review.
+          </p>
         </div>
-      )}
 
-      {result && (
-        <div style={{ marginTop: '30px' }}>
-          <h2>Summary</h2>
-          <p>{result.summary}</p>
+        <div className="terminal-card">
+          <div className="terminal-bar">
+            <span className="dot red"></span>
+            <span className="dot yellow"></span>
+            <span className="dot green"></span>
+            <span className="terminal-label">review.sh</span>
+          </div>
+          <div className="terminal-body">
+            <div className="input-row">
+              <span className="prompt-symbol">$</span>
+              <input
+                type="text"
+                className="url-input"
+                value={prUrl}
+                onChange={(e) => setPrUrl(e.target.value)}
+                onKeyDown={handleKeyDown}
+                placeholder="paste PR url — https://github.com/owner/repo/pull/123"
+              />
+            </div>
+            <button
+              className="review-button"
+              onClick={handleReview}
+              disabled={loading || !prUrl}
+            >
+              {loading ? (
+                <>
+                  <span className="spinner"></span>
+                  Reviewing...
+                </>
+              ) : (
+                'Review PR'
+              )}
+            </button>
+          </div>
+        </div>
 
-          <h2>Quality Score: {result.overall_quality_score} / 10</h2>
+        {error && (
+          <div className="error-box">✗ {error}</div>
+        )}
 
-          <h2>Issues Found</h2>
-          {result.issues && result.issues.length > 0 ? (
-            result.issues.map((issue, index) => (
-              <div
-                key={index}
-                style={{
-                  border: '1px solid #ccc',
-                  borderRadius: '8px',
-                  padding: '12px',
-                  marginBottom: '10px',
-                }}
-              >
-                <strong>{issue.file}</strong>
-                <p>
-                  <span style={{ fontWeight: 'bold', textTransform: 'uppercase' }}>
-                    {issue.severity}
-                  </span>{' '}
-                  — {issue.category}
-                </p>
-                <p>{issue.comment}</p>
+        {result && (
+          <div className="results">
+            <div className="summary-card">
+              <div className="summary-text">
+                <p className="section-label">Summary</p>
+                <p className="summary-body">{result.summary}</p>
               </div>
-            ))
-          ) : (
-            <p>No issues found.</p>
-          )}
-        </div>
-      )}
+              <div className="score-badge">
+                <div className="score-value">{result.overall_quality_score}</div>
+                <div className="score-max">/ 10</div>
+              </div>
+            </div>
+
+            <p className="issues-heading">
+              Issues ({result.issues ? result.issues.length : 0})
+            </p>
+
+            {result.issues && result.issues.length > 0 ? (
+              result.issues.map((issue, index) => (
+                <div
+                  key={index}
+                  className={`issue-card severity-${issue.severity}`}
+                >
+                  <div className="issue-header">
+                    <span className="issue-file">{issue.file}</span>
+                    <span className={`badge severity-${issue.severity}`}>
+                      {issue.severity}
+                    </span>
+                    <span className="badge category">{issue.category}</span>
+                  </div>
+                  <p className="issue-comment">{issue.comment}</p>
+                </div>
+              ))
+            ) : (
+              <div className="no-issues">✓ No issues found — clean PR</div>
+            )}
+          </div>
+        )}
+      </div>
     </div>
   )
 }
