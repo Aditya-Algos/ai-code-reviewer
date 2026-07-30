@@ -14,7 +14,7 @@ function App() {
 
     try {
       const response = await fetch(
-        `http://127.0.0.1:8000/api/review?pr_url=${encodeURIComponent(prUrl)}`
+        `https://ai-code-reviewer-backend-xnny.onrender.com/api/review?pr_url=${encodeURIComponent(prUrl)}`
       )
       const data = await response.json()
 
