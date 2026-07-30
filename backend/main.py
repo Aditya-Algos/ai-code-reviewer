@@ -25,21 +25,35 @@ def health_check():
     return {"status": "AI COde Reviewer backend is running"}
 
 @app.get("/api/review")
-def get_pr_diff(pr_url: str):
-    parts = pr_url.strip("/").split("/")
-    owner = parts[-4]
-    repo = parts[-3]
-    pr_number = parts[-1]
+def get_pr_review(pr_url: str):
+    # Validate URL format
+    if "github.com" not in pr_url or "/pull/" not in pr_url:
+        return {"error": "That doesn't look like a valid GitHub PR URL. Expected format: https://github.com/owner/repo/pull/123"}
+
+    try:
+        parts = pr_url.strip("/").split("/")
+        owner = parts[-4]
+        repo = parts[-3]
+        pr_number = parts[-1]
+    except IndexError:
+        return {"error": "Could not parse the PR URL. Please check the format."}
 
     github_api_url = f"https://api.github.com/repos/{owner}/{repo}/pulls/{pr_number}/files"
-    response =requests.get(github_api_url)
+    response = requests.get(github_api_url)
 
+    if response.status_code == 404:
+        return {"error": "PR not found. It may be private, deleted, or the URL is incorrect."}
+    if response.status_code == 403:
+        return {"error": "GitHub API rate limit reached. Please try again in a few minutes."}
     if response.status_code != 200:
-        return {"error": "Could not fetch PR", "status": response.status_code}
+        return {"error": f"Could not fetch PR from GitHub (status {response.status_code})."}
 
     files = response.json()
 
-    diff_text=""
+    if not files:
+        return {"error": "This PR has no file changes to review."}
+
+    diff_text = ""
     for f in files[:5]:
         diff_text += f"\n\nFile: {f['filename']}\n{f.get('patch', '')}"
 
@@ -59,18 +73,20 @@ Diff to review:
 {diff_text}
 """
 
-    ai_response = client.models.generate_content(
-        model="gemini-3.6-flash",
-        contents=prompt
-    )
+    try:
+        ai_response = client.models.generate_content(
+            model="gemini-flash-latest",
+            contents=prompt
+        )
+    except Exception as e:
+        return {"error": "AI review failed. The service may be temporarily unavailable. Please try again."}
 
     raw_text = ai_response.text.strip()
-
     raw_text = raw_text.replace("```json", "").replace("```", "").strip()
 
     try:
-        review =json.loads(raw_text)
+        review = json.loads(raw_text)
     except json.JSONDecodeError:
-        return {"error": "Could not parse AI response", "raw_response": raw_text}
+        return {"error": "Could not parse the AI's response. Please try again."}
 
     return review
