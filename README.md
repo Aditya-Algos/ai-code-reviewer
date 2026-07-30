@@ -2,7 +2,7 @@
 
 An AI-powered tool that reviews GitHub Pull Requests automatically. Paste a PR link and get a structured, AI-generated code review — summary, quality score, and specific issues flagged by file — powered by Google's Gemini API.
 
-![Demo Screenshot](screenshots/demo.png)
+![Demo Screenshot](Screenshots/demo.png)
 
 ## Features
 
