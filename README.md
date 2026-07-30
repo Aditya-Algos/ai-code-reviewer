@@ -2,6 +2,8 @@
 
 An AI-powered tool that reviews GitHub Pull Requests automatically. Paste a PR link and get a structured, AI-generated code review — summary, quality score, and specific issues flagged by file — powered by Google's Gemini API.
 
+🔗 **[Live Demo](https://ai-code-reviewer-psi-six.vercel.app/)** | [GitHub Repo](https://github.com/Aditya-Algos/ai-code-reviewer)
+
 ![Demo Screenshot](Screenshots/demo.png)
 
 ## Features
@@ -97,7 +99,6 @@ ai-code-reviewer/
 - Review history stored in a database (PostgreSQL)
 - GitHub OAuth for reviewing private repositories
 - Inline diff viewer with AI comments overlaid directly on changed lines
-- Deploy live demo (frontend on Vercel, backend on Render/Railway)
 
 ## License
 
